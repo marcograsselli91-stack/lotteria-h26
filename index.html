@@ -89,7 +89,8 @@ const LOTTERY_NAME = "H26";
 const TOTAL_TICKETS = 10200;
 
 const eur = v => v.toLocaleString("it-IT",{style:"currency",currency:"EUR"});
-const blockRange = i => { const s=i*TICKETS_PER_BLOCK+1; return `${s}–${s+TICKETS_PER_BLOCK-1}`; };
+const pad = n => String(n).padStart(5,'0');
+const blockRange = i => { const s=i*TICKETS_PER_BLOCK+1; return `${pad(s)}–${pad(s+TICKETS_PER_BLOCK-1)}`; };
 
 const H = {
   "Content-Type":"application/json",
