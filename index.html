@@ -13,7 +13,7 @@
   .header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
   .header-title{font-size:21px;font-weight:800}
   .header-sub{font-size:12px;opacity:0.65;margin-top:4px}
-  .header-btns{display:flex;gap:8px}
+  .header-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
   .header-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700}
   .tabs{display:flex;gap:4px}
   .tab{border:none;border-radius:8px 8px 0 0;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:700}
@@ -31,7 +31,8 @@
   .badge-green{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
   .badge-red{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
   .badge-yellow{background:#fef9c3;color:#713f12;border:1px solid #fde047}
-  .btn{border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;padding:10px 20px;display:inline-flex;align-items:center;gap:6px}
+  .badge-orange{background:#ffedd5;color:#9a3412;border:1px solid #fdba74}
+  .btn{border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;padding:10px 20px;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
   .btn-primary{background:#1d4ed8;color:#fff}
   .btn-success{background:#16a34a;color:#fff}
   .btn-danger{background:#dc2626;color:#fff}
@@ -42,10 +43,10 @@
   label.field{display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:5px}
   .field-wrap{margin-bottom:14px}
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
-  .modal{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:480px;box-shadow:0 25px 60px rgba(0,0,0,0.25)}
+  .modal{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:480px;box-shadow:0 25px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto}
   .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
   .modal-title{font-size:17px;font-weight:700;color:#111}
-  .modal-close{background:#f3f4f6;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;color:#888}
+  .modal-close{background:#f3f4f6;border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;color:#888;flex-shrink:0}
   .block-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
   .block-meta{font-family:monospace;font-size:11px;color:#9ca3af;font-weight:600}
   .block-name{font-size:15px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}
@@ -64,7 +65,7 @@
   .spinner-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a8a,#2563eb)}
   .spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .error-bar{background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#991b1b;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .error-bar{background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#991b1b;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}
   .pending-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f3f4f6;flex-wrap:wrap}
   .checkbox-row{display:flex;gap:20px;margin-bottom:20px;flex-wrap:wrap}
   .checkbox-label{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:600;color:#374151}
@@ -72,104 +73,109 @@
   .count-label{font-size:12px;color:#9ca3af;margin-bottom:12px}
   .pending-header{font-size:14px;font-weight:700;color:#92400e;margin-bottom:12px}
   .pending-card{background:#fff;border-radius:14px;padding:16px;margin-top:8px;box-shadow:0 2px 10px rgba(0,0,0,0.07);border:1.5px solid #fde68a}
-  .btn-row{display:flex;gap:10px;justify-content:flex-end}
+  .btn-row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+  .hint{font-size:12px;color:#9ca3af;margin-top:4px}
+  .exc-badge{background:#ffedd5;color:#9a3412;border:1px solid #fdba74;display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:600;margin-top:4px}
 </style>
 </head>
 <body>
-
 <div id="app"></div>
-
 <script>
 const SUPABASE_URL = "https://hrldlqdjhfhegwadketk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhybGRscWRqaGZoZWd3YWRrZXRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzY3NDAsImV4cCI6MjA5NDIxMjc0MH0.-EZr7DfVbP5UfBZdwJ2HWV83oV76Q6TEXAtfq4uSF10";
 const TICKETS_PER_BLOCK = 20;
 const TICKET_PRICE = 2.50;
-const BLOCK_PRICE = TICKETS_PER_BLOCK * TICKET_PRICE;
 const LOTTERY_NAME = "H26";
 const TOTAL_TICKETS = 10200;
 
 const eur = v => v.toLocaleString("it-IT",{style:"currency",currency:"EUR"});
-const pad = n => String(n).padStart(5,'0');
-const blockRange = i => { const s=i*TICKETS_PER_BLOCK+1; return `${pad(s)}–${pad(s+TICKETS_PER_BLOCK-1)}`; };
+const pad = n => String(n).padStart(5,"0");
+
+// Calcola biglietti effettivi di un blocchetto (tolti gli esclusi)
+function ticketsInBlock(b) {
+  const excl = parseExclusi(b.esclusi);
+  return TICKETS_PER_BLOCK - excl.length;
+}
+
+function parseExclusi(str) {
+  if(!str || !str.trim()) return [];
+  return str.split(",").map(s=>s.trim()).filter(s=>s.length>0);
+}
+
+function blockLabel(b) {
+  return pad(b.primo_numero);
+}
+
+function blockRangeLabel(b) {
+  const end = b.primo_numero + TICKETS_PER_BLOCK - 1;
+  const excl = parseExclusi(b.esclusi);
+  const actual = TICKETS_PER_BLOCK - excl.length;
+  const base = pad(b.primo_numero) + "–" + pad(end);
+  return actual < TICKETS_PER_BLOCK ? base + " (" + actual + " biglietti)" : base;
+}
 
 const H = {
   "Content-Type":"application/json",
   "apikey": SUPABASE_KEY,
-  "Authorization": `Bearer ${SUPABASE_KEY}`
+  "Authorization": "Bearer " + SUPABASE_KEY
 };
 
-async function sbGet(table, params="") {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {headers:H});
-  if(!r.ok) throw new Error(`GET ${table}: ${r.status} ${await r.text()}`);
+async function sbGet(table, params) {
+  const r = await fetch(SUPABASE_URL+"/rest/v1/"+table+"?"+(params||""), {headers:H});
+  if(!r.ok) throw new Error("GET "+table+": "+r.status+" "+await r.text());
   return r.json();
 }
 async function sbPost(table, body) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+  const r = await fetch(SUPABASE_URL+"/rest/v1/"+table, {
     method:"POST", headers:{...H,"Prefer":"return=representation"}, body:JSON.stringify(body)
   });
-  if(!r.ok) throw new Error(`POST ${table}: ${r.status} ${await r.text()}`);
+  if(!r.ok) throw new Error("POST "+table+": "+r.status+" "+await r.text());
   const t = await r.text();
   if(!t||t==="null") return [];
   const d = JSON.parse(t);
   return Array.isArray(d)?d:[d];
 }
 async function sbPatch(table, id, body) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+  const r = await fetch(SUPABASE_URL+"/rest/v1/"+table+"?id=eq."+id, {
     method:"PATCH", headers:{...H,"Prefer":"return=representation"}, body:JSON.stringify(body)
   });
-  if(!r.ok) throw new Error(`PATCH ${table}: ${r.status} ${await r.text()}`);
+  if(!r.ok) throw new Error("PATCH "+table+": "+r.status+" "+await r.text());
   return r.json();
 }
 async function sbDelete(table, filter) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {method:"DELETE",headers:H});
-  if(!r.ok) throw new Error(`DELETE ${table}: ${r.status} ${await r.text()}`);
+  const r = await fetch(SUPABASE_URL+"/rest/v1/"+table+"?"+filter, {method:"DELETE",headers:H});
+  if(!r.ok) throw new Error("DELETE "+table+": "+r.status+" "+await r.text());
 }
 
-// ── State ────────────────────────────────────────────────────────────────────
 let state = {
-  blocks: [],
-  tab: "blocks",
-  filter: "all",
-  search: "",
-  editingBlock: null,
-  showReset: false,
-  showConfirmReset: false,
-  showPickBlock: false,
-  pickBlockError: null,
-  loading: true,
-  syncing: false,
-  error: null,
-  savingBlock: false,
-  initialized: false,
+  blocks: [], tab:"blocks", filter:"all", search:"",
+  editingBlock:null, showReset:false, showPickBlock:false,
+  pickBlockError:null, loading:true, syncing:false,
+  error:null, savingBlock:false
 };
 
-function setState(patch) {
-  Object.assign(state, patch);
-  render();
-}
+function setState(patch) { Object.assign(state,patch); render(); }
 
-// ── Data ────────────────────────────────────────────────────────────────────
 async function loadBlocks() {
-  const blks = await sbGet("blocchetti","order=indice.asc");
-  return blks||[];
+  return await sbGet("blocchetti","order=primo_numero.asc") || [];
 }
 
 async function ensureInitialized() {
   try {
     const configs = await sbGet("lotteria_config","order=id.desc&limit=1");
     if(!configs||configs.length===0) {
-      // Prima volta: crea config e blocchetti
       await sbPost("lotteria_config",{nome:LOTTERY_NAME,biglietti_totali:TOTAL_TICKETS});
       const numBlocks = Math.floor(TOTAL_TICKETS/TICKETS_PER_BLOCK);
       for(let i=0;i<numBlocks;i+=50) {
         const batch = Array.from({length:Math.min(50,numBlocks-i)},(_,j)=>({
-          indice:i+j,assegnato_a:"",note:"",pagato:false,restituito:false
+          indice:i+j, primo_numero:(i+j)*TICKETS_PER_BLOCK+1,
+          assegnato_a:"", note:"", pagato:false, restituito:false, esclusi:""
         }));
         await sbPost("blocchetti",batch);
       }
     }
     const blks = await loadBlocks();
-    setState({blocks:blks,loading:false,initialized:true,error:null});
+    setState({blocks:blks,loading:false,error:null});
   } catch(e) {
     setState({error:"Errore connessione: "+e.message,loading:false});
   }
@@ -187,26 +193,20 @@ async function saveBlock(id, data) {
 }
 
 async function clearBlock(id) {
-  const reset = {assegnato_a:"",note:"",pagato:false,restituito:false};
+  const reset = {assegnato_a:"",note:"",pagato:false,restituito:false,esclusi:""};
   try {
     await sbPatch("blocchetti",id,reset);
-    const blks = state.blocks.map(b=>b.id===id?{...b,...reset}:b);
-    setState({blocks:blks});
-  } catch(e) {
-    setState({error:"Errore: "+e.message});
-  }
+    setState({blocks:state.blocks.map(b=>b.id===id?{...b,...reset}:b)});
+  } catch(e) { setState({error:"Errore: "+e.message}); }
 }
 
 async function doReset() {
-  setState({loading:true,showReset:false,showConfirmReset:false});
+  setState({loading:true,showReset:false});
   try {
     await sbDelete("blocchetti","indice=gte.0");
     await sbDelete("lotteria_config","id=gte.0");
-    setState({initialized:false});
     await ensureInitialized();
-  } catch(e) {
-    setState({error:"Errore reset: "+e.message,loading:false});
-  }
+  } catch(e) { setState({error:"Errore reset: "+e.message,loading:false}); }
 }
 
 async function refreshBlocks() {
@@ -214,315 +214,301 @@ async function refreshBlocks() {
   try {
     const blks = await loadBlocks();
     setState({blocks:blks,syncing:false,error:null});
-  } catch(e) {
-    setState({syncing:false,error:"Errore aggiornamento: "+e.message});
-  }
+  } catch(e) { setState({syncing:false,error:"Errore aggiornamento: "+e.message}); }
 }
 
 function exportExcel() {
   const {blocks} = state;
+  const totalBiglietti = blocks.reduce((s,b)=>s+ticketsInBlock(b),0);
   const assigned = blocks.filter(b=>b.assegnato_a).length;
   const paid = blocks.filter(b=>b.pagato).length;
   const returned = blocks.filter(b=>b.restituito).length;
+  const paidTickets = blocks.filter(b=>b.pagato).reduce((s,b)=>s+ticketsInBlock(b),0);
+  const unpaidTickets = blocks.filter(b=>b.assegnato_a&&!b.pagato).reduce((s,b)=>s+ticketsInBlock(b),0);
 
   const ws1 = XLSX.utils.json_to_sheet(blocks.map(b=>({
-    "N°":b.indice+1,"Biglietti":blockRange(b.indice),
-    "Assegnato a":b.assegnato_a||"—","Note":b.note||"",
-    "Pagato":b.pagato?"✓ Sì":"✗ No","Restituito":b.restituito?"✓ Sì":"✗ No",
-    "Stato":!b.assegnato_a?"Non assegnato":(!b.pagato&&!b.restituito)?"Da pagare+restituire":!b.pagato?"Da pagare":!b.restituito?"Da restituire":"✓ OK"
+    "Primo N°": pad(b.primo_numero),
+    "Range": pad(b.primo_numero)+"–"+pad(b.primo_numero+TICKETS_PER_BLOCK-1),
+    "Biglietti": ticketsInBlock(b),
+    "Esclusi": b.esclusi||"",
+    "Assegnato a": b.assegnato_a||"—",
+    "Note": b.note||"",
+    "Pagato": b.pagato?"✓ Sì":"✗ No",
+    "Restituito": b.restituito?"✓ Sì":"✗ No",
+    "Valore": eur(ticketsInBlock(b)*TICKET_PRICE),
+    "Stato": !b.assegnato_a?"Non assegnato":(!b.pagato&&!b.restituito)?"Da pagare+restituire":!b.pagato?"Da pagare":!b.restituito?"Da restituire":"✓ OK"
   })));
-  ws1["!cols"]=[6,14,22,20,10,12,22].map(w=>({wch:w}));
+  ws1["!cols"]=[8,14,9,16,22,20,10,12,12,22].map(w=>({wch:w}));
 
   const pending = blocks.filter(b=>b.assegnato_a&&(!b.pagato||!b.restituito));
   const ws2 = XLSX.utils.json_to_sheet(pending.length?pending.map(b=>({
-    "N°":b.indice+1,"Biglietti":blockRange(b.indice),
-    "Assegnato a":b.assegnato_a,"Note":b.note||"",
-    "Deve pagare":!b.pagato?"✗ Sì":"","Deve restituire":!b.restituito?"✗ Sì":""
+    "Primo N°": pad(b.primo_numero),
+    "Assegnato a": b.assegnato_a,
+    "Note": b.note||"",
+    "Biglietti": ticketsInBlock(b),
+    "Deve pagare": !b.pagato?"✗ Sì":"",
+    "Deve restituire": !b.restituito?"✗ Sì":"",
+    "Da incassare": !b.pagato?eur(ticketsInBlock(b)*TICKET_PRICE):""
   })):[{"Info":"Nessuna pendenza 🎉"}]);
-  ws2["!cols"]=[6,14,22,20,12,14].map(w=>({wch:w}));
+  ws2["!cols"]=[8,22,20,9,12,14,14].map(w=>({wch:w}));
 
   const now = new Date();
   const ws3 = XLSX.utils.json_to_sheet([
     {"Voce":"Nome lotteria","Valore":LOTTERY_NAME},
-    {"Voce":"Biglietti totali","Valore":TOTAL_TICKETS},
+    {"Voce":"Biglietti nominali","Valore":TOTAL_TICKETS},
+    {"Voce":"Biglietti effettivi","Valore":totalBiglietti},
+    {"Voce":"Biglietti esclusi","Valore":TOTAL_TICKETS-totalBiglietti},
     {"Voce":"Prezzo biglietto","Valore":"€ 2,50"},
-    {"Voce":"Valore totale","Valore":eur(TOTAL_TICKETS*TICKET_PRICE)},
+    {"Voce":"Valore totale effettivo","Valore":eur(totalBiglietti*TICKET_PRICE)},
     {"Voce":"Blocchetti totali","Valore":blocks.length},
-    {"Voce":"Assegnati","Valore":assigned},
-    {"Voce":"Non assegnati","Valore":blocks.length-assigned},
-    {"Voce":"Pagati","Valore":paid},
-    {"Voce":"Incassato","Valore":eur(paid*BLOCK_PRICE)},
-    {"Voce":"Da pagare","Valore":assigned-paid},
-    {"Voce":"Da incassare","Valore":eur((assigned-paid)*BLOCK_PRICE)},
-    {"Voce":"Restituiti","Valore":returned},
+    {"Voce":"Blocchetti assegnati","Valore":assigned},
+    {"Voce":"Blocchetti liberi","Valore":blocks.length-assigned},
+    {"Voce":"Incassato","Valore":eur(paidTickets*TICKET_PRICE)},
+    {"Voce":"Da incassare","Valore":eur(unpaidTickets*TICKET_PRICE)},
+    {"Voce":"Blocchetti restituiti","Valore":returned},
     {"Voce":"Da restituire","Valore":assigned-returned},
-    {"Voce":"Data report","Valore":now.toLocaleString("it-IT")},
+    {"Voce":"Data report","Valore":now.toLocaleString("it-IT")}
   ]);
-  ws3["!cols"]=[{wch:22},{wch:20}];
+  ws3["!cols"]=[{wch:24},{wch:20}];
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws1,"Tutti i blocchetti");
   XLSX.utils.book_append_sheet(wb,ws2,"Pendenze");
   XLSX.utils.book_append_sheet(wb,ws3,"Riepilogo");
-  XLSX.writeFile(wb,`Lotteria_H26_${now.toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb,"Lotteria_H26_"+now.toISOString().slice(0,10)+".xlsx");
 }
 
-// ── Render ───────────────────────────────────────────────────────────────────
 function render() {
   const app = document.getElementById("app");
   if(!app) return;
-
   if(state.loading) {
-    app.innerHTML = `<div class="spinner-wrap"><div class="spinner"></div></div>`;
+    app.innerHTML = "<div class=\"spinner-wrap\"><div class=\"spinner\"></div></div>";
     return;
   }
-
   const {blocks,tab,filter,search,editingBlock,showReset,syncing,error,savingBlock} = state;
-  // showPickBlock used via state.showPickBlock
-  const total = blocks.length;
+  const totalBiglietti = blocks.reduce((s,b)=>s+ticketsInBlock(b),0);
   const assigned = blocks.filter(b=>b.assegnato_a).length;
-  const paid = blocks.filter(b=>b.pagato).length;
+  const paidBlocks = blocks.filter(b=>b.pagato);
+  const paid = paidBlocks.length;
   const returned = blocks.filter(b=>b.restituito).length;
+  const paidTickets = paidBlocks.reduce((s,b)=>s+ticketsInBlock(b),0);
+  const unpaidAssigned = blocks.filter(b=>b.assegnato_a&&!b.pagato);
+  const unpaidTickets = unpaidAssigned.reduce((s,b)=>s+ticketsInBlock(b),0);
 
   let filtered = blocks;
-  if(search.trim()) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(b=>b.assegnato_a?.toLowerCase().includes(q)||b.note?.toLowerCase().includes(q));
-  }
-  if(filter==="unpaid") filtered = filtered.filter(b=>b.assegnato_a&&!b.pagato);
-  if(filter==="unreturned") filtered = filtered.filter(b=>b.assegnato_a&&!b.restituito);
-  if(filter==="unassigned") filtered = filtered.filter(b=>!b.assegnato_a);
+  if(search.trim()){const q=search.toLowerCase();filtered=filtered.filter(b=>b.assegnato_a?.toLowerCase().includes(q)||b.note?.toLowerCase().includes(q)||pad(b.primo_numero).includes(q));}
+  if(filter==="unpaid") filtered=filtered.filter(b=>b.assegnato_a&&!b.pagato);
+  if(filter==="unreturned") filtered=filtered.filter(b=>b.assegnato_a&&!b.restituito);
+  if(filter==="unassigned") filtered=filtered.filter(b=>!b.assegnato_a);
+  if(filter==="exceptions") filtered=filtered.filter(b=>b.esclusi&&b.esclusi.trim());
 
   const kpis = [
-    {label:"Valore totale lotteria",value:eur(TOTAL_TICKETS*TICKET_PRICE),icon:"🎟️",color:"#1d4ed8",sub:`${TOTAL_TICKETS} biglietti × €2,50`},
-    {label:"Incassato",value:eur(paid*BLOCK_PRICE),icon:"💰",color:"#16a34a",sub:`${paid} blocchetti pagati`,alert:false},
-    {label:"Da incassare",value:eur((assigned-paid)*BLOCK_PRICE),icon:"⏳",color:"#d97706",sub:`${assigned-paid} blocchetti non pagati`,alert:(assigned-paid)>0},
-    {label:"Blocchetti assegnati",value:`${assigned} / ${total}`,icon:"👤",color:"#7c3aed",sub:`${total-assigned} ancora liberi`,alert:false},
-    {label:"Da restituire",value:assigned-returned,icon:"📬",color:"#0891b2",sub:`${returned} già restituiti`,alert:(assigned-returned)>0},
+    {label:"Valore totale lotteria",value:eur(totalBiglietti*TICKET_PRICE),icon:"🎟️",color:"#1d4ed8",sub:totalBiglietti+" biglietti effettivi"},
+    {label:"Incassato",value:eur(paidTickets*TICKET_PRICE),icon:"💰",color:"#16a34a",sub:paid+" blocchetti pagati",alert:false},
+    {label:"Da incassare",value:eur(unpaidTickets*TICKET_PRICE),icon:"⏳",color:"#d97706",sub:unpaidAssigned.length+" blocchetti non pagati",alert:unpaidAssigned.length>0},
+    {label:"Blocchetti assegnati",value:assigned+" / "+blocks.length,icon:"👤",color:"#7c3aed",sub:(blocks.length-assigned)+" ancora liberi",alert:false},
+    {label:"Da restituire",value:assigned-returned,icon:"📬",color:"#0891b2",sub:returned+" già restituiti",alert:(assigned-returned)>0},
   ];
 
-  app.innerHTML = `
-    <div class="header">
-      <div class="header-inner">
-        <div class="header-top">
-          <div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span class="header-title">🎟️ ${LOTTERY_NAME}</span>
-              ${syncing?`<span style="font-size:11px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:99px;font-weight:600">⟳</span>`:""}
-            </div>
-            <div class="header-sub">${TOTAL_TICKETS} biglietti · ${total} blocchetti · Supabase ☁️</div>
-          </div>
-          <div class="header-btns">
-            <button class="header-btn" onclick="refreshBlocks()">🔄</button>
-            <button class="header-btn" onclick="exportExcel()">📥 Excel</button>
-            <button class="header-btn" onclick="setState({showReset:true})">⚙️</button>
-          </div>
-        </div>
-        <div class="tabs">
-          <button class="tab ${tab==='blocks'?'active':'inactive'}" onclick="setState({tab:'blocks'})">📦 Blocchetti</button>
-          <button class="tab ${tab==='dashboard'?'active':'inactive'}" onclick="setState({tab:'dashboard'})">📊 Riepilogo</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="content">
-      ${error?`<div class="error-bar">⚠️ ${error}<button onclick="setState({error:null})" style="background:none;border:none;cursor:pointer;color:#991b1b;font-weight:700;font-size:16px">×</button></div>`:""}
-
-      ${tab==="dashboard"?`
-        <div style="margin-bottom:16px">
-          <button class="btn btn-success" onclick="exportExcel()">📥 Scarica report Excel</button>
-        </div>
-        ${kpis.map(c=>`
-          <div class="card kpi-card">
-            <div class="kpi-icon">${c.icon}</div>
-            <div style="flex:1">
-              <div class="kpi-label">${c.label}</div>
-              <div class="kpi-value" style="color:${c.color}">${c.value}</div>
-              <div class="kpi-sub ${c.alert?'alert':''}">${c.sub}</div>
-            </div>
-          </div>
-        `).join("")}
-        ${(assigned-paid>0||assigned-returned>0)?`
-          <div class="pending-card">
-            <div class="pending-header">⚠️ Pendenze</div>
-            ${blocks.filter(b=>b.assegnato_a&&(!b.pagato||!b.restituito)).map(b=>`
-              <div class="pending-row">
-                <span style="font-size:10px;color:#9ca3af;min-width:60px;font-family:monospace">#${b.indice+1}</span>
-                <span style="flex:1;font-weight:700;font-size:13px">${b.assegnato_a}</span>
-                <div style="display:flex;gap:4px;flex-wrap:wrap">
-                  ${!b.pagato?`<span class="badge badge-red">Da pagare</span>`:""}
-                  ${!b.restituito?`<span class="badge badge-yellow">Da restituire</span>`:""}
-                </div>
-              </div>
-            `).join("")}
-          </div>
-        `:""}
-      `:`
-        <input class="search-input" placeholder="🔍 Cerca per nome…" value="${search.replace(/"/g,'&quot;')}"
-          oninput="setState({search:this.value})"/>
-        <div class="filter-bar">
-          ${[["all","Tutti"],["unassigned","Liberi"],["unpaid","Da pagare"],["unreturned","Da restituire"]].map(([k,l])=>`
-            <button class="filter-btn ${filter===k?'active':'inactive'}" onclick="setState({filter:'${k}'})">${l}</button>
-          `).join("")}
-        </div>
-        <div class="count-label">${filtered.length} blocchett${filtered.length===1?"o":"i"}</div>
-        ${filtered.map(b=>`
-          <div class="card">
-            <div class="block-header">
-              <div style="flex:1;min-width:0">
-                <div class="block-meta">#${b.indice+1} · ${blockRange(b.indice)}</div>
-                <div class="block-name ${b.assegnato_a?'':'empty'}">${b.assegnato_a||"Non assegnato"}</div>
-                ${b.note?`<div class="block-note">${b.note}</div>`:""}
-              </div>
-              <div class="block-actions">
-                <button class="block-action" style="background:#f3f4f6" onclick='openEdit(${b.id})'>✏️</button>
-                <button class="block-action" style="background:#fee2e2" onclick='confirmDelete(${b.id})'>🗑️</button>
-              </div>
-            </div>
-            <div class="badges">
-              <span class="badge ${b.pagato?'badge-green':'badge-red'}">${b.pagato?"✓ Pagato":"⏳ Da pagare"}</span>
-              <span class="badge ${b.restituito?'badge-green':'badge-yellow'}">${b.restituito?"✓ Restituito":"⏳ Da restituire"}</span>
-            </div>
-          </div>
-        `).join("")}
-        ${filtered.length===0?`<div style="text-align:center;padding:40px 20px;color:#d1d5db"><div style="font-size:40px;margin-bottom:8px">🔍</div><p style="font-weight:700">Nessun blocchetto trovato</p></div>`:""}
-        <button class="fab" onclick="setState({showPickBlock:true,pickBlockError:null})">✏️ Assegna</button>
-      `}
-    </div>
-
-    ${editingBlock?renderEditModal():""}
-    ${showReset?renderResetModal():""}
-    ${state.showPickBlock?renderPickModal():""}
-  `;
+  app.innerHTML =
+    "<div class=\"header\">" +
+      "<div class=\"header-inner\">" +
+        "<div class=\"header-top\">" +
+          "<div>" +
+            "<div style=\"display:flex;align-items:center;gap:8px\">" +
+              "<span class=\"header-title\">🎟️ "+LOTTERY_NAME+"</span>" +
+              (syncing?"<span style=\"font-size:11px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:99px;font-weight:600\">⟳</span>":"") +
+            "</div>" +
+            "<div class=\"header-sub\">"+TOTAL_TICKETS+" biglietti · "+blocks.length+" blocchetti · Supabase ☁️</div>" +
+          "</div>" +
+          "<div class=\"header-btns\">" +
+            "<button class=\"header-btn\" onclick=\"refreshBlocks()\">🔄</button>" +
+            "<button class=\"header-btn\" onclick=\"exportExcel()\">📥 Excel</button>" +
+            "<button class=\"header-btn\" onclick=\"setState({showReset:true})\">⚙️</button>" +
+          "</div>" +
+        "</div>" +
+        "<div class=\"tabs\">" +
+          "<button class=\"tab "+(tab==="blocks"?"active":"inactive")+"\" onclick=\"setState({tab:\'blocks\'})\">📦 Blocchetti</button>" +
+          "<button class=\"tab "+(tab==="dashboard"?"active":"inactive")+"\" onclick=\"setState({tab:\'dashboard\'})\">📊 Riepilogo</button>" +
+        "</div>" +
+      "</div>" +
+    "</div>" +
+    "<div class=\"content\">" +
+      (error?"<div class=\"error-bar\">⚠️ "+error+"<button onclick=\"setState({error:null})\" style=\"background:none;border:none;cursor:pointer;color:#991b1b;font-weight:700;font-size:16px\">×</button></div>":"") +
+      (tab==="dashboard"?renderDashboard(kpis,blocks,assigned,returned):renderBlocks(filtered,filter,search)) +
+    "</div>" +
+    (tab==="blocks"?"<button class=\"fab\" onclick=\"setState({showPickBlock:true,pickBlockError:null})\">✏️ Assegna</button>":"") +
+    (editingBlock?renderEditModal():"") +
+    (showReset?renderResetModal():"") +
+    (state.showPickBlock?renderPickModal():"");
 }
 
-function renderEditModal() {
-  const b = state.editingBlock;
-  return `
-    <div class="modal-overlay" onclick="if(event.target===this)setState({editingBlock:null})">
-      <div class="modal">
-        <div class="modal-header">
-          <div class="modal-title">Blocchetto #${b.indice+1} · ${blockRange(b.indice)}</div>
-          <button class="modal-close" onclick="setState({editingBlock:null})">×</button>
-        </div>
-        ${state.savingBlock?`<div style="text-align:center;padding:20px;color:#6b7280">⟳ Salvataggio…</div>`:`
-          <div class="field-wrap">
-            <label class="field">Assegnato a</label>
-            <input type="text" id="inp-name" value="${(b.assegnato_a||'').replace(/"/g,'&quot;')}" placeholder="Nome e cognome"/>
-          </div>
-          <div class="field-wrap">
-            <label class="field">Note (opzionale)</label>
-            <input type="text" id="inp-note" value="${(b.note||'').replace(/"/g,'&quot;')}" placeholder="Telefono, appunti…"/>
-          </div>
-          <div class="checkbox-row">
-            <label class="checkbox-label">
-              <input type="checkbox" id="chk-paid" ${b.pagato?"checked":""}/>
-              💰 Pagato
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" id="chk-ret" ${b.restituito?"checked":""}/>
-              📦 Restituito
-            </label>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-ghost" onclick="setState({editingBlock:null})">Annulla</button>
-            <button class="btn btn-primary" onclick="doSave()">💾 Salva</button>
-          </div>
-        `}
-      </div>
-    </div>`;
+function renderDashboard(kpis,blocks,assigned,returned) {
+  return "<div style=\"margin-bottom:16px\"><button class=\"btn btn-success\" onclick=\"exportExcel()\">📥 Scarica report Excel</button></div>" +
+    kpis.map(c=>
+      "<div class=\"card kpi-card\">" +
+        "<div class=\"kpi-icon\">"+c.icon+"</div>" +
+        "<div style=\"flex:1\">" +
+          "<div class=\"kpi-label\">"+c.label+"</div>" +
+          "<div class=\"kpi-value\" style=\"color:"+c.color+"\">"+c.value+"</div>" +
+          "<div class=\"kpi-sub "+(c.alert?"alert":"")+"\">"+c.sub+"</div>" +
+        "</div>" +
+      "</div>"
+    ).join("") +
+    ((assigned-returned>0||blocks.filter(b=>b.assegnato_a&&!b.pagato).length>0)?
+      "<div class=\"pending-card\">" +
+        "<div class=\"pending-header\">⚠️ Pendenze</div>" +
+        blocks.filter(b=>b.assegnato_a&&(!b.pagato||!b.restituito)).map(b=>
+          "<div class=\"pending-row\">" +
+            "<span style=\"font-size:10px;color:#9ca3af;min-width:70px;font-family:monospace\">"+pad(b.primo_numero)+"</span>" +
+            "<span style=\"flex:1;font-weight:700;font-size:13px\">"+b.assegnato_a+"</span>" +
+            "<div style=\"display:flex;gap:4px;flex-wrap:wrap\">" +
+              (!b.pagato?"<span class=\"badge badge-red\">Da pagare</span>":"") +
+              (!b.restituito?"<span class=\"badge badge-yellow\">Da restituire</span>":"") +
+            "</div>" +
+          "</div>"
+        ).join("") +
+      "</div>"
+    :"");
 }
 
-function renderResetModal() {
-  return `
-    <div class="modal-overlay" onclick="if(event.target===this)setState({showReset:false})">
-      <div class="modal">
-        <div class="modal-header">
-          <div class="modal-title">⚠️ Reset lotteria</div>
-          <button class="modal-close" onclick="setState({showReset:false})">×</button>
-        </div>
-        <p style="color:#374151;font-size:14px;margin-bottom:20px">
-          Vuoi eliminare tutti i dati? Verranno cancellati anche da Supabase.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-ghost" onclick="setState({showReset:false})">Annulla</button>
-          <button class="btn btn-danger" onclick="doReset()">🗑️ Azzera tutto</button>
-        </div>
-      </div>
-    </div>`;
+function renderBlocks(filtered,filter,search) {
+  return "<input class=\"search-input\" placeholder=\"🔍 Cerca per nome o numero…\" value=\""+search.replace(/"/g,"&quot;")+"\" oninput=\"setState({search:this.value})\"/>" +
+    "<div class=\"filter-bar\">" +
+      [["all","Tutti"],["unassigned","Liberi"],["unpaid","Da pagare"],["unreturned","Da restituire"],["exceptions","Eccezioni"]].map(([k,l])=>
+        "<button class=\"filter-btn "+(filter===k?"active":"inactive")+"\" onclick=\"setState({filter:\'"+k+"\'})\">" +l+"</button>"
+      ).join("") +
+    "</div>" +
+    "<div class=\"count-label\">"+filtered.length+" blocchett"+(filtered.length===1?"o":"i")+"</div>" +
+    filtered.map(b=>
+      "<div class=\"card\">" +
+        "<div class=\"block-header\">" +
+          "<div style=\"flex:1;min-width:0\">" +
+            "<div class=\"block-meta\">"+pad(b.primo_numero)+" – "+pad(b.primo_numero+TICKETS_PER_BLOCK-1)+(b.esclusi&&b.esclusi.trim()?" · <span class=\"exc-badge\">⚠️ "+ticketsInBlock(b)+" biglietti</span>":"")+"</div>" +
+            "<div class=\"block-name "+(b.assegnato_a?"":"empty")+"\">"+( b.assegnato_a||"Non assegnato")+"</div>" +
+            (b.note?"<div class=\"block-note\">"+b.note+"</div>":"") +
+          "</div>" +
+          "<div class=\"block-actions\">" +
+            "<button class=\"block-action\" style=\"background:#f3f4f6\" onclick=\"openEdit("+b.id+")\" >✏️</button>" +
+            "<button class=\"block-action\" style=\"background:#fee2e2\" onclick=\"confirmDelete("+b.id+")\" >🗑️</button>" +
+          "</div>" +
+        "</div>" +
+        "<div class=\"badges\">" +
+          "<span class=\"badge "+(b.pagato?"badge-green":"badge-red")+"\">"+(b.pagato?"✓ Pagato":"⏳ Da pagare")+"</span>" +
+          "<span class=\"badge "+(b.restituito?"badge-green":"badge-yellow")+"\">"+(b.restituito?"✓ Restituito":"⏳ Da restituire")+"</span>" +
+          (b.esclusi&&b.esclusi.trim()?"<span class=\"badge badge-orange\">⚠️ Esclusi: "+b.esclusi+"</span>":"") +
+        "</div>" +
+      "</div>"
+    ).join("") +
+    (filtered.length===0?"<div style=\"text-align:center;padding:40px 20px;color:#d1d5db\"><div style=\"font-size:40px;margin-bottom:8px\">🔍</div><p style=\"font-weight:700\">Nessun blocchetto trovato</p></div>":"");
 }
 
 function renderPickModal() {
   const err = state.pickBlockError;
   const total = state.blocks.length;
-  return `
-    <div class="modal-overlay" onclick="if(event.target===this)setState({showPickBlock:false,pickBlockError:null})">
-      <div class="modal">
-        <div class="modal-header">
-          <div class="modal-title">📦 Scegli blocchetto</div>
-          <button class="modal-close" onclick="setState({showPickBlock:false,pickBlockError:null})">×</button>
-        </div>
-        <div class="field-wrap">
-          <label class="field">Numero blocchetto (1–${total})</label>
-          <input type="number" id="inp-pick" min="1" max="${total}" placeholder="Es. 12"
-            style="font-size:22px;font-weight:700;text-align:center"
-            onkeydown="if(event.key==='Enter')doPickBlock()"/>
-        </div>
-        ${err?`<div style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px">⚠️ ${err}</div>`:""}
-        <div style="font-size:12px;color:#9ca3af;margin-bottom:16px">
-          Oppure <a href="#" onclick="openFirstFree();setState({showPickBlock:false});return false" 
-            style="color:#1d4ed8;font-weight:600">apri il primo libero</a>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-ghost" onclick="setState({showPickBlock:false,pickBlockError:null})">Annulla</button>
-          <button class="btn btn-primary" onclick="doPickBlock()">✏️ Apri</button>
-        </div>
-      </div>
-    </div>`;
+  return "<div class=\"modal-overlay\" onclick=\"if(event.target===this)setState({showPickBlock:false,pickBlockError:null})\">" +
+    "<div class=\"modal\">" +
+      "<div class=\"modal-header\">" +
+        "<div class=\"modal-title\">📦 Scegli blocchetto</div>" +
+        "<button class=\"modal-close\" onclick=\"setState({showPickBlock:false,pickBlockError:null})\">×</button>" +
+      "</div>" +
+      "<div class=\"field-wrap\">" +
+        "<label class=\"field\">Primo numero del blocchetto</label>" +
+        "<input type=\"number\" id=\"inp-pick\" min=\"1\" max=\""+TOTAL_TICKETS+"\" placeholder=\"Es. 00001 oppure 03501\" style=\"font-size:20px;font-weight:700;text-align:center\" onkeydown=\"if(event.key===\'Enter\')doPickBlock()\"/>" +
+        "<div class=\"hint\">Inserisci il primo numero stampato sul blocchetto</div>" +
+      "</div>" +
+      (err?"<div style=\"color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px\">⚠️ "+err+"</div>":"") +
+      "<div style=\"font-size:12px;color:#9ca3af;margin-bottom:16px\">" +
+        "Oppure <a href=\"#\" onclick=\"openFirstFree();setState({showPickBlock:false});return false\" style=\"color:#1d4ed8;font-weight:600\">apri il primo blocchetto libero</a>" +
+      "</div>" +
+      "<div class=\"btn-row\">" +
+        "<button class=\"btn btn-ghost\" onclick=\"setState({showPickBlock:false,pickBlockError:null})\">Annulla</button>" +
+        "<button class=\"btn btn-primary\" onclick=\"doPickBlock()\">✏️ Apri</button>" +
+      "</div>" +
+    "</div>" +
+  "</div>";
 }
+
+function renderEditModal() {
+  const b = state.editingBlock;
+  const excl = b.esclusi||"";
+  return "<div class=\"modal-overlay\" onclick=\"if(event.target===this)setState({editingBlock:null})\">" +
+    "<div class=\"modal\">" +
+      "<div class=\"modal-header\">" +
+        "<div class=\"modal-title\">"+pad(b.primo_numero)+"–"+pad(b.primo_numero+TICKETS_PER_BLOCK-1)+"</div>" +
+        "<button class=\"modal-close\" onclick=\"setState({editingBlock:null})\">×</button>" +
+      "</div>" +
+      (state.savingBlock?"<div style=\"text-align:center;padding:20px;color:#6b7280\">⟳ Salvataggio…</div>":
+        "<div class=\"field-wrap\">" +
+          "<label class=\"field\">Assegnato a</label>" +
+          "<input type=\"text\" id=\"inp-name\" value=\""+( b.assegnato_a||"").replace(/"/g,"&quot;")+"\" placeholder=\"Nome e cognome\"/>" +
+        "</div>" +
+        "<div class=\"field-wrap\">" +
+          "<label class=\"field\">Note (opzionale)</label>" +
+          "<input type=\"text\" id=\"inp-note\" value=\""+( b.note||"").replace(/"/g,"&quot;")+"\" placeholder=\"Telefono, appunti…\"/>" +
+        "</div>" +
+        "<div class=\"field-wrap\">" +
+          "<label class=\"field\">Biglietti esclusi (eccezioni)</label>" +
+          "<input type=\"text\" id=\"inp-excl\" value=\""+excl.replace(/"/g,"&quot;")+"\" placeholder=\"Es. 00005, 00012\"/>" +
+          "<div class=\"hint\">Inserisci i numeri mancanti separati da virgola. Il blocchetto avrà "+(TICKETS_PER_BLOCK-parseExclusi(excl).length)+" biglietti ("+eur((TICKETS_PER_BLOCK-parseExclusi(excl).length)*TICKET_PRICE)+").</div>" +
+        "</div>" +
+        "<div class=\"checkbox-row\">" +
+          "<label class=\"checkbox-label\"><input type=\"checkbox\" id=\"chk-paid\" "+(b.pagato?"checked":"")+"/> 💰 Pagato</label>" +
+          "<label class=\"checkbox-label\"><input type=\"checkbox\" id=\"chk-ret\" "+(b.restituito?"checked":"")+"/> 📦 Restituito</label>" +
+        "</div>" +
+        "<div class=\"btn-row\">" +
+          "<button class=\"btn btn-ghost\" onclick=\"setState({editingBlock:null})\">Annulla</button>" +
+          "<button class=\"btn btn-primary\" onclick=\"doSave()\">💾 Salva</button>" +
+        "</div>"
+      ) +
+    "</div>" +
+  "</div>";
+}
+
+function renderResetModal() {
+  return "<div class=\"modal-overlay\" onclick=\"if(event.target===this)setState({showReset:false})\">" +
+    "<div class=\"modal\">" +
+      "<div class=\"modal-header\">" +
+        "<div class=\"modal-title\">⚠️ Reset lotteria</div>" +
+        "<button class=\"modal-close\" onclick=\"setState({showReset:false})\">×</button>" +
+      "</div>" +
+      "<p style=\"color:#374151;font-size:14px;margin-bottom:20px\">Vuoi eliminare tutti i dati? Verranno cancellati anche da Supabase.</p>" +
+      "<div class=\"btn-row\">" +
+        "<button class=\"btn btn-ghost\" onclick=\"setState({showReset:false})\">Annulla</button>" +
+        "<button class=\"btn btn-danger\" onclick=\"doReset()\">🗑️ Azzera tutto</button>" +
+      "</div>" +
+    "</div>" +
+  "</div>";
+}
+
+function openEdit(id) { const b=state.blocks.find(x=>x.id===id); if(b) setState({editingBlock:{...b}}); }
+function openFirstFree() { const b=state.blocks.find(x=>!x.assegnato_a)||state.blocks[0]; if(b) setState({editingBlock:{...b}}); }
+function confirmDelete(id) { if(confirm("Eliminare l'assegnazione di questo blocchetto?")) clearBlock(id); }
 
 function doPickBlock() {
-  const val = parseInt(document.getElementById("inp-pick")?.value);
-  const total = state.blocks.length;
-  if(!val || val < 1 || val > total) {
-    setState({pickBlockError:`Inserisci un numero tra 1 e ${total}`});
-    return;
-  }
-  const block = state.blocks.find(b => b.indice === val - 1);
-  if(!block) {
-    setState({pickBlockError:"Blocchetto non trovato"});
-    return;
-  }
-  setState({editingBlock:{...block}, showPickBlock:false, pickBlockError:null});
-}
-
-function openEdit(id) {
-  const b = state.blocks.find(x=>x.id===id);
-  if(b) setState({editingBlock:{...b}});
-}
-
-function openFirstFree() {
-  const b = state.blocks.find(x=>!x.assegnato_a)||state.blocks[0];
-  if(b) setState({editingBlock:{...b}});
-}
-
-function confirmDelete(id) {
-  if(confirm("Eliminare l'assegnazione di questo blocchetto?")) clearBlock(id);
+  const raw = document.getElementById("inp-pick")?.value?.trim();
+  if(!raw) { setState({pickBlockError:"Inserisci un numero"}); return; }
+  const num = parseInt(raw);
+  if(isNaN(num)||num<1||num>TOTAL_TICKETS) { setState({pickBlockError:"Numero non valido (1–"+TOTAL_TICKETS+")"}); return; }
+  // Cerca blocchetto il cui primo_numero corrisponde
+  let block = state.blocks.find(b=>b.primo_numero===num);
+  // Se non trovato esatto, cerca il blocchetto che contiene quel numero
+  if(!block) block = state.blocks.find(b=>num>=b.primo_numero&&num<b.primo_numero+TICKETS_PER_BLOCK);
+  if(!block) { setState({pickBlockError:"Blocchetto non trovato per il numero "+pad(num)}); return; }
+  setState({editingBlock:{...block},showPickBlock:false,pickBlockError:null});
 }
 
 function doSave() {
   const b = state.editingBlock;
   const name = document.getElementById("inp-name")?.value||"";
   const note = document.getElementById("inp-note")?.value||"";
+  const excl = document.getElementById("inp-excl")?.value||"";
   const paid = document.getElementById("chk-paid")?.checked||false;
   const ret = document.getElementById("chk-ret")?.checked||false;
-  saveBlock(b.id, {assegnato_a:name, note, pagato:paid, restituito:ret});
+  saveBlock(b.id,{assegnato_a:name,note,pagato:paid,restituito:ret,esclusi:excl});
 }
 
-// Auto-refresh ogni 30 secondi
-setInterval(()=>{ if(!state.loading&&!state.syncing) refreshBlocks(); }, 30000);
-
-// Avvio
+setInterval(()=>{ if(!state.loading&&!state.syncing) refreshBlocks(); },30000);
 ensureInitialized();
 </script>
 </body>
