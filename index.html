@@ -551,6 +551,22 @@ function doSave() {
   saveBlock(b.id,{assegnato_a:name,note,pagato:paid,restituito:ret,esclusi:excl});
 }
 
+// Bind search input after every full render
+const _origRender = render;
+window.render = function() {
+  _origRender();
+  bindSearch();
+};
+function bindSearch() {
+  const el = document.getElementById("search-input");
+  if(!el) return;
+  el.removeEventListener("input", onSearchInput);
+  el.addEventListener("input", onSearchInput);
+}
+function onSearchInput(e) {
+  Object.assign(state, {search: e.target.value});
+  renderBlockList();
+}
 setInterval(()=>{ if(!state.loading&&!state.syncing) refreshBlocks(); },30000);
 ensureInitialized();
 </script>
