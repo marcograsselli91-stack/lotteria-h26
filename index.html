@@ -133,6 +133,8 @@ let state = {
   editingBlock: null,
   showReset: false,
   showConfirmReset: false,
+  showPickBlock: false,
+  pickBlockError: null,
   loading: true,
   syncing: false,
   error: null,
@@ -275,6 +277,7 @@ function render() {
   }
 
   const {blocks,tab,filter,search,editingBlock,showReset,syncing,error,savingBlock} = state;
+  // showPickBlock used via state.showPickBlock
   const total = blocks.length;
   const assigned = blocks.filter(b=>b.assegnato_a).length;
   const paid = blocks.filter(b=>b.pagato).length;
@@ -382,12 +385,13 @@ function render() {
           </div>
         `).join("")}
         ${filtered.length===0?`<div style="text-align:center;padding:40px 20px;color:#d1d5db"><div style="font-size:40px;margin-bottom:8px">🔍</div><p style="font-weight:700">Nessun blocchetto trovato</p></div>`:""}
-        <button class="fab" onclick="openFirstFree()">✏️ Assegna</button>
+        <button class="fab" onclick="setState({showPickBlock:true,pickBlockError:null})">✏️ Assegna</button>
       `}
     </div>
 
     ${editingBlock?renderEditModal():""}
     ${showReset?renderResetModal():""}
+    ${state.showPickBlock?renderPickModal():""}
   `;
 }
 
@@ -445,6 +449,50 @@ function renderResetModal() {
         </div>
       </div>
     </div>`;
+}
+
+function renderPickModal() {
+  const err = state.pickBlockError;
+  const total = state.blocks.length;
+  return `
+    <div class="modal-overlay" onclick="if(event.target===this)setState({showPickBlock:false,pickBlockError:null})">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">📦 Scegli blocchetto</div>
+          <button class="modal-close" onclick="setState({showPickBlock:false,pickBlockError:null})">×</button>
+        </div>
+        <div class="field-wrap">
+          <label class="field">Numero blocchetto (1–${total})</label>
+          <input type="number" id="inp-pick" min="1" max="${total}" placeholder="Es. 12"
+            style="font-size:22px;font-weight:700;text-align:center"
+            onkeydown="if(event.key==='Enter')doPickBlock()"/>
+        </div>
+        ${err?`<div style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px">⚠️ ${err}</div>`:""}
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:16px">
+          Oppure <a href="#" onclick="openFirstFree();setState({showPickBlock:false});return false" 
+            style="color:#1d4ed8;font-weight:600">apri il primo libero</a>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="setState({showPickBlock:false,pickBlockError:null})">Annulla</button>
+          <button class="btn btn-primary" onclick="doPickBlock()">✏️ Apri</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function doPickBlock() {
+  const val = parseInt(document.getElementById("inp-pick")?.value);
+  const total = state.blocks.length;
+  if(!val || val < 1 || val > total) {
+    setState({pickBlockError:`Inserisci un numero tra 1 e ${total}`});
+    return;
+  }
+  const block = state.blocks.find(b => b.indice === val - 1);
+  if(!block) {
+    setState({pickBlockError:"Blocchetto non trovato"});
+    return;
+  }
+  setState({editingBlock:{...block}, showPickBlock:false, pickBlockError:null});
 }
 
 function openEdit(id) {
