@@ -139,26 +139,43 @@
   </div>
 </div>
 
-<!-- MODAL ASSEGNA (pick) -->
+<!-- MODAL ASSEGNA MULTIPLO -->
 <div id="modal-pick" class="overlay" style="display:none" onclick="if(event.target===this)closePick()">
   <div class="modal">
     <div class="mhdr">
-      <div class="mtitle">📦 Scegli blocchetto</div>
+      <div class="mtitle">✏️ Assegna blocchetti</div>
       <button class="mclose" onclick="closePick()">×</button>
     </div>
-    <div class="fw">
-      <label class="field-lbl">Primo numero del blocchetto</label>
-      <input type="number" id="inp-pick" min="1" max="10200" placeholder="Es. 1 oppure 3501" style="font-size:20px;font-weight:700;text-align:center"/>
-      <div class="hint">Inserisci il primo numero stampato sul blocchetto</div>
+    <div id="pick-body">
+      <div class="fw">
+        <label class="field-lbl">Assegnato a</label>
+        <input type="text" id="inp-pick-name" placeholder="Nome e cognome"/>
+      </div>
+      <div class="fw">
+        <label class="field-lbl">Note (opzionale)</label>
+        <input type="text" id="inp-pick-note" placeholder="Telefono, appunti…"/>
+      </div>
+      <div class="crow">
+        <label class="clbl"><input type="checkbox" id="chk-pick-paid"/> 💰 Pagato</label>
+        <label class="clbl"><input type="checkbox" id="chk-pick-ret"/> 📦 Restituito</label>
+      </div>
+      <div class="fw">
+        <label class="field-lbl">Blocchetti da assegnare</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input type="number" id="inp-pick-num" min="1" max="10200" placeholder="Primo numero blocchetto" style="font-size:16px;font-weight:700;text-align:center"/>
+          <button class="btn bp" onclick="addPickBlock()" style="flex-shrink:0;padding:10px 14px">➕</button>
+        </div>
+        <div class="hint">Inserisci il primo numero e premi ➕ per ogni blocchetto</div>
+      </div>
+      <div id="pick-blocks-list" style="margin-bottom:12px"></div>
+      <div id="pick-count" style="font-size:13px;color:#1d4ed8;font-weight:700;margin-bottom:12px;display:none"></div>
+      <div id="pick-error" style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px;display:none"></div>
+      <div class="brow">
+        <button class="btn bgh" onclick="closePick()">Annulla</button>
+        <button class="btn bp" onclick="doMultiAssign()">💾 Salva</button>
+      </div>
     </div>
-    <div id="pick-error" style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px;display:none"></div>
-    <div style="font-size:12px;color:#9ca3af;margin-bottom:16px">
-      Oppure <a href="#" onclick="openFirstFree();closePick();return false" style="color:#1d4ed8;font-weight:600">apri il primo blocchetto libero</a>
-    </div>
-    <div class="brow">
-      <button class="btn bgh" onclick="closePick()">Annulla</button>
-      <button class="btn bp" onclick="doPickBlock()">✏️ Apri</button>
-    </div>
+    <div id="pick-saving" style="display:none;text-align:center;padding:20px;color:#6b7280">⟳ Salvataggio…</div>
   </div>
 </div>
 
@@ -234,6 +251,7 @@
       </div>
       <div class="crow">
         <label class="clbl"><input type="checkbox" id="chk-donor-paid"/> 💰 Già pagato</label>
+        <label class="clbl"><input type="checkbox" id="chk-donor-ret"/> 📦 Restituito</label>
       </div>
       <div id="donor-error" style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px;display:none"></div>
       <div class="brow">
@@ -424,23 +442,94 @@ document.addEventListener("DOMContentLoaded", function(){
 });
 
 // ── Modali ────────────────────────────────────────────────────────────────────
-function openPick(){ document.getElementById("modal-pick").style.display="flex"; document.getElementById("inp-pick").value=""; document.getElementById("pick-error").style.display="none"; setTimeout(()=>document.getElementById("inp-pick").focus(),100); }
-function closePick(){ document.getElementById("modal-pick").style.display="none"; }
+// blocchetti selezionati nel modale multi-assign
+let pickSelected = []; // array di block ids
 
-function doPickBlock(){
-  const raw = document.getElementById("inp-pick").value.trim();
+function openPick(){
+  pickSelected = [];
+  document.getElementById("modal-pick").style.display="flex";
+  document.getElementById("pick-body").style.display="block";
+  document.getElementById("pick-saving").style.display="none";
+  document.getElementById("inp-pick-name").value="";
+  document.getElementById("inp-pick-note").value="";
+  document.getElementById("inp-pick-num").value="";
+  document.getElementById("chk-pick-paid").checked=false;
+  document.getElementById("chk-pick-ret").checked=false;
+  document.getElementById("pick-error").style.display="none";
+  document.getElementById("pick-count").style.display="none";
+  document.getElementById("pick-blocks-list").innerHTML="";
+  setTimeout(()=>document.getElementById("inp-pick-name").focus(),100);
+}
+function closePick(){ document.getElementById("modal-pick").style.display="none"; pickSelected=[]; }
+
+function addPickBlock(){
+  const raw = document.getElementById("inp-pick-num").value.trim();
   const num = parseInt(raw);
   const errEl = document.getElementById("pick-error");
+  errEl.style.display="none";
   if(isNaN(num)||num<1||num>TOTAL_TICKETS){ errEl.textContent="Numero non valido (1–"+TOTAL_TICKETS+")"; errEl.style.display="block"; return; }
   let b = blocks.find(x=>x.primo_numero===num) || blocks.find(x=>num>=x.primo_numero&&num<x.primo_numero+TICKETS_PER_BLOCK);
   if(!b){ errEl.textContent="Blocchetto non trovato per il numero "+pad(num); errEl.style.display="block"; return; }
-  closePick();
-  openEdit(b.id);
+  if(pickSelected.includes(b.id)){ errEl.textContent="Blocchetto "+pad(b.primo_numero)+" già aggiunto"; errEl.style.display="block"; return; }
+  pickSelected.push(b.id);
+  document.getElementById("inp-pick-num").value="";
+  document.getElementById("inp-pick-num").focus();
+  renderPickList();
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  document.getElementById("inp-pick-num").addEventListener("keydown",function(e){
+    if(e.key==="Enter"){ e.preventDefault(); addPickBlock(); }
+  });
+});
+
+function renderPickList(){
+  const listEl = document.getElementById("pick-blocks-list");
+  const countEl = document.getElementById("pick-count");
+  if(pickSelected.length===0){ listEl.innerHTML=""; countEl.style.display="none"; return; }
+  countEl.style.display="block";
+  countEl.textContent = pickSelected.length+" blocchett"+(pickSelected.length===1?"o":"i")+" selezionat"+(pickSelected.length===1?"o":"i")+" · "+eur(pickSelected.length*50);
+  listEl.innerHTML = pickSelected.map(id=>{
+    const b = blocks.find(x=>x.id===id);
+    if(!b) return "";
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f0f4ff;border-radius:8px;margin-bottom:6px;font-size:13px">'+
+      '<span style="font-family:monospace;font-weight:700">'+pad(b.primo_numero)+'–'+pad(b.primo_numero+TICKETS_PER_BLOCK-1)+'</span>'+
+      (b.assegnato_a?'<span style="color:#d97706;font-size:11px">⚠️ già assegnato a '+b.assegnato_a+'</span>':'')+
+      '<button onclick="removePickBlock('+id+')" style="background:#fee2e2;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px;color:#991b1b">✕</button>'+
+    '</div>';
+  }).join("");
+}
+
+function removePickBlock(id){
+  pickSelected = pickSelected.filter(x=>x!==id);
+  renderPickList();
+}
+
+async function doMultiAssign(){
+  const name = document.getElementById("inp-pick-name").value.trim();
+  const note = document.getElementById("inp-pick-note").value.trim();
+  const paid = document.getElementById("chk-pick-paid").checked;
+  const ret = document.getElementById("chk-pick-ret").checked;
+  const errEl = document.getElementById("pick-error");
+  if(!name){ errEl.textContent="Inserisci il nome"; errEl.style.display="block"; return; }
+  if(pickSelected.length===0){ errEl.textContent="Aggiungi almeno un blocchetto"; errEl.style.display="block"; return; }
+  errEl.style.display="none";
+  document.getElementById("pick-body").style.display="none";
+  document.getElementById("pick-saving").style.display="block";
+  try {
+    for(const id of pickSelected){
+      await sbPatch("blocchetti",id,{assegnato_a:name,note,pagato:paid,restituito:ret});
+      blocks=blocks.map(b=>b.id===id?{...b,assegnato_a:name,note,pagato:paid,restituito:ret}:b);
+    }
+    closePick();
+    renderAll();
+  } catch(e){ showError("Errore: "+e.message); closePick(); }
 }
 
 function openFirstFree(){
-  const b = blocks.find(x=>!x.assegnato_a)||blocks[0];
-  if(b) openEdit(b.id);
+  openPick();
+  const b = blocks.find(x=>!x.assegnato_a);
+  if(b){ pickSelected=[b.id]; setTimeout(()=>renderPickList(),50); }
 }
 
 function openEdit(id){
@@ -604,8 +693,9 @@ async function doDonorAssign(){
   const toAssign = freeBlocks.slice(0, numBlocks);
   try {
     for(const b of toAssign){
-      await sbPatch("blocchetti", b.id, {assegnato_a:name, note:note, pagato:paid, restituito:false});
-      blocks = blocks.map(x=>x.id===b.id?{...x,assegnato_a:name,note:note,pagato:paid,restituito:false}:x);
+      const ret = document.getElementById("chk-donor-ret").checked;
+      await sbPatch("blocchetti", b.id, {assegnato_a:name, note:note, pagato:paid, restituito:ret});
+      blocks = blocks.map(x=>x.id===b.id?{...x,assegnato_a:name,note:note,pagato:paid,restituito:ret}:x);
     }
     document.getElementById("donor-saving").style.display="none";
     document.getElementById("donor-result").style.display="block";
