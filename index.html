@@ -122,7 +122,10 @@
       <div class="fbar" id="filter-bar"></div>
       <div id="count-label" class="clbl2"></div>
       <div id="block-list"></div>
-      <button class="fab" onclick="openPick()">✏️ Assegna</button>
+      <div style="position:fixed;bottom:24px;right:20px;display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+        <button class="fab" style="position:static;font-size:13px;padding:10px 16px;background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 20px #16a34a66" onclick="openDonor()">💎 Donatore</button>
+        <button class="fab" style="position:static" onclick="openPick()">✏️ Assegna</button>
+      </div>
     </div>
 
     <!-- TAB DASHBOARD -->
@@ -204,6 +207,44 @@
     <div class="brow">
       <button class="btn bgh" onclick="closeReset()">Annulla</button>
       <button class="btn bd" onclick="doReset()">🗑️ Azzera tutto</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DONATORE -->
+<div id="modal-donor" class="overlay" style="display:none" onclick="if(event.target===this)closeDonor()">
+  <div class="modal">
+    <div class="mhdr">
+      <div class="mtitle">💎 Assegna per importo</div>
+      <button class="mclose" onclick="closeDonor()">×</button>
+    </div>
+    <div id="donor-body">
+      <div class="fw">
+        <label class="field-lbl">Nome donatore</label>
+        <input type="text" id="inp-donor-name" placeholder="Nome e cognome"/>
+      </div>
+      <div class="fw">
+        <label class="field-lbl">Importo donazione (multiplo di € 50)</label>
+        <input type="number" id="inp-donor-amount" min="50" step="50" placeholder="Es. 500 oppure 1500" style="font-size:22px;font-weight:700;text-align:center"/>
+        <div class="hint" id="donor-hint">Inserisci l'importo — ogni blocchetto vale € 50,00</div>
+      </div>
+      <div class="fw">
+        <label class="field-lbl">Note (opzionale)</label>
+        <input type="text" id="inp-donor-note" placeholder="Telefono, appunti…"/>
+      </div>
+      <div class="crow">
+        <label class="clbl"><input type="checkbox" id="chk-donor-paid"/> 💰 Già pagato</label>
+      </div>
+      <div id="donor-error" style="color:#dc2626;font-size:13px;font-weight:600;margin-bottom:12px;display:none"></div>
+      <div class="brow">
+        <button class="btn bgh" onclick="closeDonor()">Annulla</button>
+        <button class="btn bs" onclick="doDonorAssign()">💎 Assegna blocchetti</button>
+      </div>
+    </div>
+    <div id="donor-saving" style="display:none;text-align:center;padding:20px;color:#6b7280">⟳ Assegnazione in corso…</div>
+    <div id="donor-result" style="display:none">
+      <div id="donor-result-msg" style="font-size:15px;font-weight:700;color:#16a34a;margin-bottom:12px;text-align:center"></div>
+      <div class="brow"><button class="btn bp" onclick="closeDonor()">✓ Chiudi</button></div>
     </div>
   </div>
 </div>
@@ -507,6 +548,76 @@ function exportExcel(){
   XLSX.utils.book_append_sheet(wb,ws2,"Pendenze");
   XLSX.utils.book_append_sheet(wb,ws3,"Riepilogo");
   XLSX.writeFile(wb,"Lotteria_H26_"+now.toISOString().slice(0,10)+".xlsx");
+}
+
+// ── Donatore ─────────────────────────────────────────────────────────────────
+function openDonor(){
+  document.getElementById("modal-donor").style.display="flex";
+  document.getElementById("donor-body").style.display="block";
+  document.getElementById("donor-saving").style.display="none";
+  document.getElementById("donor-result").style.display="none";
+  document.getElementById("donor-error").style.display="none";
+  document.getElementById("inp-donor-name").value="";
+  document.getElementById("inp-donor-amount").value="";
+  document.getElementById("inp-donor-note").value="";
+  document.getElementById("chk-donor-paid").checked=false;
+  document.getElementById("donor-hint").textContent="Inserisci l'importo — ogni blocchetto vale € 50,00";
+  setTimeout(()=>document.getElementById("inp-donor-name").focus(),100);
+}
+function closeDonor(){ document.getElementById("modal-donor").style.display="none"; }
+
+document.addEventListener("DOMContentLoaded",function(){
+  document.getElementById("inp-donor-amount").addEventListener("input",function(){
+    const v = parseInt(this.value);
+    const errEl = document.getElementById("donor-error");
+    if(!v||v<50){ document.getElementById("donor-hint").textContent="Inserisci l'importo — ogni blocchetto vale € 50,00"; return; }
+    if(v%50!==0){ errEl.textContent="L'importo deve essere multiplo di € 50"; errEl.style.display="block"; document.getElementById("donor-hint").textContent=""; return; }
+    errEl.style.display="none";
+    const n = v/50;
+    const free = blocks.filter(b=>!b.assegnato_a).length;
+    if(n>free){
+      document.getElementById("donor-hint").textContent="⚠️ Servono "+n+" blocchetti ma ce ne sono solo "+free+" liberi";
+    } else {
+      document.getElementById("donor-hint").textContent="✓ Verranno assegnati "+n+" blocchetti (€ "+v.toLocaleString("it-IT")+")";
+    }
+  });
+});
+
+async function doDonorAssign(){
+  const name = document.getElementById("inp-donor-name").value.trim();
+  const amount = parseInt(document.getElementById("inp-donor-amount").value);
+  const note = document.getElementById("inp-donor-note").value.trim();
+  const paid = document.getElementById("chk-donor-paid").checked;
+  const errEl = document.getElementById("donor-error");
+
+  if(!name){ errEl.textContent="Inserisci il nome del donatore"; errEl.style.display="block"; return; }
+  if(!amount||amount<50||amount%50!==0){ errEl.textContent="Importo non valido (minimo € 50, multiplo di € 50)"; errEl.style.display="block"; return; }
+
+  const numBlocks = amount/50;
+  const freeBlocks = blocks.filter(b=>!b.assegnato_a);
+  if(numBlocks>freeBlocks.length){ errEl.textContent="Non ci sono abbastanza blocchetti liberi (servono "+numBlocks+", disponibili "+freeBlocks.length+")"; errEl.style.display="block"; return; }
+
+  errEl.style.display="none";
+  document.getElementById("donor-body").style.display="none";
+  document.getElementById("donor-saving").style.display="block";
+
+  const toAssign = freeBlocks.slice(0, numBlocks);
+  try {
+    for(const b of toAssign){
+      await sbPatch("blocchetti", b.id, {assegnato_a:name, note:note, pagato:paid, restituito:false});
+      blocks = blocks.map(x=>x.id===b.id?{...x,assegnato_a:name,note:note,pagato:paid,restituito:false}:x);
+    }
+    document.getElementById("donor-saving").style.display="none";
+    document.getElementById("donor-result").style.display="block";
+    document.getElementById("donor-result-msg").innerHTML =
+      "✓ Assegnati <strong>"+numBlocks+" blocchetti</strong> a <strong>"+name+"</strong><br>"+
+      "Da "+pad(toAssign[0].primo_numero)+" a "+pad(toAssign[numBlocks-1].primo_numero+(TICKETS_PER_BLOCK-1))+"<br>"+
+      "Valore: <strong>€ "+amount.toLocaleString("it-IT")+"</strong>";
+    renderAll();
+  } catch(e){
+    showError("Errore assegnazione: "+e.message);
+    closeDonor();
+  }
 }
 
 // Auto-refresh 30 secondi
