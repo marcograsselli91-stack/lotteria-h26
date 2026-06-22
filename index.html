@@ -59,6 +59,12 @@
   .fb-a{border:2px solid #1d4ed8;background:#eff6ff;color:#1d4ed8}
   .fb-i{border:2px solid #e5e7eb;background:#fff;color:#6b7280}
   #search-box{width:100%;padding:11px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;margin-bottom:10px;outline:none;font-family:inherit;display:block}
+  .ticket-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px}
+  .tkt{border:none;border-radius:8px;padding:6px 4px;cursor:pointer;font-family:monospace;font-size:11px;font-weight:700;text-align:center;transition:all 0.15s;line-height:1.3}
+  .tkt-normal{background:#f0f4ff;color:#1d4ed8}
+  .tkt-excl{background:#fee2e2;color:#991b1b;text-decoration:line-through}
+  .tkt-sold{background:#d1fae5;color:#065f46}
+  .tkt-unsold{background:#f3f4f6;color:#9ca3af}
   .sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
   .sum-item{background:#f8fafc;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0}
   .sum-item-label{font-size:10px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
@@ -203,12 +209,14 @@
       </div>
       <div class="fw">
         <label class="field-lbl">Biglietti esclusi (eccezioni stamperia)</label>
-        <input type="text" id="inp-excl" placeholder="Es. 00005, 00012"/>
+        <div class="hint" style="margin-bottom:8px">Tocca i biglietti mancanti per escluderli</div>
+        <div id="grid-excl" class="ticket-grid"></div>
         <div class="hint" id="excl-hint"></div>
       </div>
       <div class="fw">
-        <label class="field-lbl">Biglietti venduti (lascia vuoto se tutti)</label>
-        <input type="text" id="inp-venduti" placeholder="Es. 00003, 00007, 00015"/>
+        <label class="field-lbl">Biglietti venduti <span style="font-weight:400;color:#9ca3af">(lascia tutto verde se tutti venduti)</span></label>
+        <div class="hint" style="margin-bottom:8px">Tocca i biglietti venduti per selezionarli</div>
+        <div id="grid-venduti" class="ticket-grid"></div>
         <div class="hint" id="venduti-hint"></div>
       </div>
       <div class="crow">
@@ -620,42 +628,117 @@ function openEdit(id){
   document.getElementById("edit-title").textContent = pad(b.primo_numero)+"–"+pad(end);
   document.getElementById("inp-name").value = b.assegnato_a||"";
   document.getElementById("inp-note").value = b.note||"";
-  document.getElementById("inp-excl").value = b.esclusi||"";
-  document.getElementById("inp-venduti").value = b.biglietti_venduti_lista||"";
   document.getElementById("chk-paid").checked = b.pagato||false;
   document.getElementById("chk-ret").checked = b.restituito||false;
-  updateExclHint();
-  updateVendutiHint();
+  // Render grids
+  renderExclGrid(b);
+  renderVendutiGrid(b);
   document.getElementById("edit-body").style.display="block";
   document.getElementById("edit-saving").style.display="none";
   document.getElementById("modal-edit").style.display="flex";
 }
 
+// Stato temporaneo griglia durante editing
+let editExclSet = new Set();   // numeri esclusi (stringa "00003")
+let editVendutiSet = new Set(); // numeri venduti (stringa "00003")
+let editBlockPrimo = 0;
+let editVendutiMode = false; // false = tutti venduti, true = selezione parziale
+
+function renderExclGrid(b){
+  editExclSet = new Set(parseExclusi(b.esclusi));
+  editBlockPrimo = b.primo_numero;
+  const grid = document.getElementById("grid-excl");
+  if(!grid) return;
+  grid.innerHTML = "";
+  for(let i=0;i<TICKETS_PER_BLOCK;i++){
+    const n = b.primo_numero + i;
+    const np = pad(n);
+    const excl = editExclSet.has(np);
+    const btn = document.createElement("button");
+    btn.className = "tkt "+(excl?"tkt-excl":"tkt-normal");
+    btn.textContent = np;
+    btn.type = "button";
+    btn.onclick = ()=>toggleExcl(np, b);
+    grid.appendChild(btn);
+  }
+  updateExclHint();
+}
+
+function toggleExcl(np, b){
+  if(editExclSet.has(np)) editExclSet.delete(np);
+  else editExclSet.add(np);
+  renderExclGrid({...b, esclusi:[...editExclSet].join(", "), primo_numero:editBlockPrimo});
+  renderVendutiGrid({...b, esclusi:[...editExclSet].join(", "), primo_numero:editBlockPrimo, biglietti_venduti_lista:[...editVendutiSet].join(", ")});
+}
+
 function updateExclHint(){
-  const excl = document.getElementById("inp-excl").value;
-  const n = TICKETS_PER_BLOCK - parseExclusi(excl).length;
-  document.getElementById("excl-hint").textContent = "Biglietti effettivi: "+n+" ("+eur(n*TICKET_PRICE)+")";
+  const n = TICKETS_PER_BLOCK - editExclSet.size;
+  const h = document.getElementById("excl-hint");
+  if(h) h.textContent = editExclSet.size>0 ? editExclSet.size+" esclusi · "+n+" biglietti effettivi ("+eur(n*TICKET_PRICE)+")" : "Nessun biglietto escluso";
+}
+
+function renderVendutiGrid(b){
+  const esclusi = new Set(parseExclusi(b.esclusi));
+  const venduti = parseVenduti(b.biglietti_venduti_lista);
+  editVendutiMode = venduti.length > 0;
+  editVendutiSet = new Set(venduti);
+  const grid = document.getElementById("grid-venduti");
+  if(!grid) return;
+  grid.innerHTML = "";
+  for(let i=0;i<TICKETS_PER_BLOCK;i++){
+    const n = b.primo_numero + i;
+    const np = pad(n);
+    if(esclusi.has(np)) continue; // salta gli esclusi
+    const sold = !editVendutiMode || editVendutiSet.has(np);
+    const btn = document.createElement("button");
+    btn.className = "tkt "+(sold?"tkt-sold":"tkt-unsold");
+    btn.textContent = np;
+    btn.type = "button";
+    btn.onclick = ()=>toggleVenduto(np, b);
+    grid.appendChild(btn);
+  }
   updateVendutiHint();
 }
 
-function updateVendutiHint(){
-  const excl = document.getElementById("inp-excl")?.value||"";
-  const disponibili = TICKETS_PER_BLOCK - parseExclusi(excl).length;
-  const v = document.getElementById("inp-venduti")?.value||"";
-  const hintEl = document.getElementById("venduti-hint");
-  if(!hintEl) return;
-  const lista = parseVenduti(v);
-  if(lista.length===0){
-    hintEl.textContent = "Se vuoto: tutti i "+disponibili+" biglietti ("+eur(disponibili*TICKET_PRICE)+")";
+function toggleVenduto(np, b){
+  const esclusi = new Set([...editExclSet]);
+  const disponibili = TICKETS_PER_BLOCK - esclusi.size;
+  // Prima click: se tutti verdi, passa a modalità selezione e deseleziona questo
+  if(!editVendutiMode){
+    editVendutiMode = true;
+    // Metti tutti come venduti tranne quello cliccato
+    editVendutiSet = new Set();
+    for(let i=0;i<TICKETS_PER_BLOCK;i++){
+      const n = b.primo_numero + i;
+      const np2 = pad(n);
+      if(!esclusi.has(np2) && np2!==np) editVendutiSet.add(np2);
+    }
   } else {
-    hintEl.textContent = "✓ "+lista.length+" biglietti venduti · valore: "+eur(lista.length*TICKET_PRICE);
+    if(editVendutiSet.has(np)) editVendutiSet.delete(np);
+    else editVendutiSet.add(np);
+    // Se tutti selezionati, torna a modalità "tutti"
+    const dispArr = [];
+    for(let i=0;i<TICKETS_PER_BLOCK;i++){
+      const n = b.primo_numero + i;
+      const np2 = pad(n);
+      if(!esclusi.has(np2)) dispArr.push(np2);
+    }
+    if(editVendutiSet.size >= dispArr.length){ editVendutiMode=false; editVendutiSet=new Set(); }
   }
+  renderVendutiGrid({...b, esclusi:[...editExclSet].join(", "), primo_numero:editBlockPrimo, biglietti_venduti_lista:[...editVendutiSet].join(", ")});
 }
 
-document.addEventListener("DOMContentLoaded",function(){
-  document.getElementById("inp-excl").addEventListener("input", updateExclHint);
-  document.getElementById("inp-venduti").addEventListener("input", updateVendutiHint);
-});
+function updateVendutiHint(){
+  const h = document.getElementById("venduti-hint");
+  if(!h) return;
+  const disponibili = TICKETS_PER_BLOCK - editExclSet.size;
+  if(!editVendutiMode){
+    h.textContent = "✓ Tutti i "+disponibili+" biglietti venduti ("+eur(disponibili*TICKET_PRICE)+")";
+  } else {
+    const n = editVendutiSet.size;
+    h.textContent = n>0 ? "🎟️ "+n+" venduti · "+eur(n*TICKET_PRICE)+" · "+(disponibili-n)+" non venduti" : "⚠️ Nessun biglietto venduto";
+  }
+}
 
 function closeEdit(){ document.getElementById("modal-edit").style.display="none"; currentEditId=null; }
 
@@ -666,8 +749,8 @@ async function doSave(){
   const data = {
     assegnato_a: document.getElementById("inp-name").value,
     note: document.getElementById("inp-note").value,
-    esclusi: document.getElementById("inp-excl").value,
-    biglietti_venduti_lista: document.getElementById("inp-venduti").value.trim(),
+    esclusi: [...editExclSet].join(", "),
+    biglietti_venduti_lista: editVendutiMode ? [...editVendutiSet].join(", ") : "",
     pagato: document.getElementById("chk-paid").checked,
     restituito: document.getElementById("chk-ret").checked
   };
