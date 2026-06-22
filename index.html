@@ -208,7 +208,7 @@
       </div>
       <div class="fw">
         <label class="field-lbl">Biglietti venduti (lascia vuoto se tutti)</label>
-        <input type="number" id="inp-venduti" min="0" max="20" placeholder="Es. 5"/>
+        <input type="text" id="inp-venduti" placeholder="Es. 00003, 00007, 00015"/>
         <div class="hint" id="venduti-hint"></div>
       </div>
       <div class="crow">
@@ -289,14 +289,20 @@ const pad = n => String(n).padStart(5,"0");
 
 function parseExclusi(str){ return (!str||!str.trim())?[]:str.split(",").map(s=>s.trim()).filter(s=>s); }
 function ticketsInBlock(b){ return TICKETS_PER_BLOCK - parseExclusi(b.esclusi).length; }
+function parseVenduti(str){
+  if(!str||!str.trim()) return [];
+  return str.split(",").map(s=>s.trim()).filter(s=>s.length>0);
+}
 function ticketsSold(b){
-  // Se biglietti_venduti è specificato, usa quello; altrimenti usa tutti i biglietti del blocchetto
-  if(b.biglietti_venduti !== null && b.biglietti_venduti !== undefined && b.biglietti_venduti !== "") return parseInt(b.biglietti_venduti);
+  const lista = parseVenduti(b.biglietti_venduti_lista);
+  if(lista.length>0) return lista.length;
   return ticketsInBlock(b);
 }
 function valueOfBlock(b){
-  // Il valore è basato sui biglietti effettivamente venduti
   return ticketsSold(b) * TICKET_PRICE;
+}
+function isPartial(b){
+  return parseVenduti(b.biglietti_venduti_lista).length > 0;
 }
 
 const H = {"Content-Type":"application/json","apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY};
@@ -592,8 +598,8 @@ async function doMultiAssign(){
   document.getElementById("pick-saving").style.display="block";
   try {
     for(const id of pickSelected){
-      await sbPatch("blocchetti",id,{assegnato_a:name,note,pagato:paid,restituito:ret});
-      blocks=blocks.map(b=>b.id===id?{...b,assegnato_a:name,note,pagato:paid,restituito:ret}:b);
+      await sbPatch("blocchetti",id,{assegnato_a:name,note,pagato:paid,restituito:ret,biglietti_venduti_lista:""});
+      blocks=blocks.map(b=>b.id===id?{...b,assegnato_a:name,note,pagato:paid,restituito:ret,biglietti_venduti_lista:""}:b);
     }
     closePick();
     renderAll();
@@ -615,7 +621,7 @@ function openEdit(id){
   document.getElementById("inp-name").value = b.assegnato_a||"";
   document.getElementById("inp-note").value = b.note||"";
   document.getElementById("inp-excl").value = b.esclusi||"";
-  document.getElementById("inp-venduti").value = (b.biglietti_venduti !== null && b.biglietti_venduti !== undefined) ? b.biglietti_venduti : "";
+  document.getElementById("inp-venduti").value = b.biglietti_venduti_lista||"";
   document.getElementById("chk-paid").checked = b.pagato||false;
   document.getElementById("chk-ret").checked = b.restituito||false;
   updateExclHint();
@@ -635,14 +641,14 @@ function updateExclHint(){
 function updateVendutiHint(){
   const excl = document.getElementById("inp-excl")?.value||"";
   const disponibili = TICKETS_PER_BLOCK - parseExclusi(excl).length;
-  const v = document.getElementById("inp-venduti")?.value;
+  const v = document.getElementById("inp-venduti")?.value||"";
   const hintEl = document.getElementById("venduti-hint");
   if(!hintEl) return;
-  if(v===""||v===null||v===undefined){
-    hintEl.textContent = "Se vuoto: tutti i "+disponibili+" biglietti disponibili ("+eur(disponibili*TICKET_PRICE)+")";
+  const lista = parseVenduti(v);
+  if(lista.length===0){
+    hintEl.textContent = "Se vuoto: tutti i "+disponibili+" biglietti ("+eur(disponibili*TICKET_PRICE)+")";
   } else {
-    const n = Math.min(parseInt(v)||0, disponibili);
-    hintEl.textContent = "Valore da incassare: "+eur(n*TICKET_PRICE)+" ("+n+" biglietti × €2,50)";
+    hintEl.textContent = "✓ "+lista.length+" biglietti venduti · valore: "+eur(lista.length*TICKET_PRICE);
   }
 }
 
@@ -657,12 +663,11 @@ async function doSave(){
   if(!currentEditId) return;
   document.getElementById("edit-body").style.display="none";
   document.getElementById("edit-saving").style.display="block";
-  const vendutiRaw = document.getElementById("inp-venduti").value;
   const data = {
     assegnato_a: document.getElementById("inp-name").value,
     note: document.getElementById("inp-note").value,
     esclusi: document.getElementById("inp-excl").value,
-    biglietti_venduti: vendutiRaw===""||vendutiRaw===null ? null : parseInt(vendutiRaw),
+    biglietti_venduti_lista: document.getElementById("inp-venduti").value.trim(),
     pagato: document.getElementById("chk-paid").checked,
     restituito: document.getElementById("chk-ret").checked
   };
@@ -704,7 +709,7 @@ function exportExcel(){
   const now=new Date();
   const ws1=XLSX.utils.json_to_sheet(blocks.map(b=>({
     "Primo N°":pad(b.primo_numero),"Range":pad(b.primo_numero)+"–"+pad(b.primo_numero+TICKETS_PER_BLOCK-1),
-    "Biglietti tot":ticketsInBlock(b),"Biglietti venduti":ticketsSold(b),"Esclusi":b.esclusi||"","Assegnato a":b.assegnato_a||"—","Note":b.note||"",
+    "Biglietti tot":ticketsInBlock(b),"Biglietti venduti":ticketsSold(b),"Numeri venduti":b.biglietti_venduti_lista||"","Esclusi":b.esclusi||"","Assegnato a":b.assegnato_a||"—","Note":b.note||"",
     "Pagato":b.pagato?"✓ Sì":"✗ No","Restituito":b.restituito?"✓ Sì":"✗ No","Valore":eur(valueOfBlock(b)),
     "Stato":!b.assegnato_a?"Non assegnato":(!b.pagato&&!b.restituito)?"Da pagare+restituire":!b.pagato?"Da pagare":!b.restituito?"Da restituire":"✓ OK"
   })));
